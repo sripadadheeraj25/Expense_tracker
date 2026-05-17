@@ -1,0 +1,96 @@
+import csv
+from django.http import HttpResponse
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
+from .models import Expense
+from .forms import ExpenseForm
+import json
+from datetime import date
+
+
+@login_required
+def expense_list(request):
+    expenses = Expense.objects.all()
+
+    total = expenses.aggregate(Sum('amount'))['amount__sum'] or 0
+
+    today = date.today()
+    monthly_expenses = expenses.filter(
+        date__year=today.year,
+        date__month=today.month
+    )
+    monthly_total = monthly_expenses.aggregate(
+        Sum('amount'))['amount__sum'] or 0
+
+    biggest = expenses.order_by('-amount').first()
+
+    category_data = {}
+    for expense in expenses:
+        label = expense.get_category_display()
+        category_data[label] = category_data.get(label, 0) + float(expense.amount)
+
+    context = {
+        'expenses': expenses,
+        'total': total,
+        'monthly_total': monthly_total,
+        'expense_count': expenses.count(),
+        'biggest': biggest,
+        'chart_labels': json.dumps(list(category_data.keys())),
+        'chart_data': json.dumps(list(category_data.values())),
+    }
+    return render(request, 'expenses/expense_list.html', context)
+
+
+@login_required
+def add_expense(request):
+    if request.method == 'POST':
+        form = ExpenseForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('expense-list')
+    else:
+        form = ExpenseForm()
+    return render(request, 'expenses/expense_form.html', {'form': form})
+
+
+@login_required
+def edit_expense(request, pk):
+    expense = get_object_or_404(Expense, pk=pk)
+    if request.method == 'POST':
+        form = ExpenseForm(request.POST, instance=expense)
+        if form.is_valid():
+            form.save()
+            return redirect('expense-list')
+    else:
+        form = ExpenseForm(instance=expense)
+    return render(request, 'expenses/expense_form.html', {'form': form})
+
+
+@login_required
+def delete_expense(request, pk):
+    expense = get_object_or_404(Expense, pk=pk)
+    if request.method == 'POST':
+        expense.delete()
+        return redirect('expense-list')
+    return render(request, 'expenses/expense_confirm_delete.html', {'expense': expense})
+
+@login_required
+def export_csv(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="expenses.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Title', 'Amount', 'Category', 'Date', 'Notes'])
+
+    expenses = Expense.objects.all()
+    for expense in expenses:
+        writer.writerow([
+            expense.title,
+            expense.amount,
+            expense.get_category_display(),
+            expense.date,
+            expense.notes or '',
+        ])
+
+    return response
