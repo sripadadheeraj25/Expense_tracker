@@ -33,6 +33,3 @@ https://expense-tracker-a471.onrender.com
    python manage.py createsuperuser
 6. Run the server
    python manage.py runserver
-
-## Screenshots
-[Add screenshots here after deployment]
