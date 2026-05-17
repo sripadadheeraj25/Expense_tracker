@@ -3,7 +3,7 @@
 A personal expense tracking web application built with Python and Django.
 
 ## Live Demo
-[Link coming soon after deployment]
+https://expense-tracker-a471.onrender.com
 
 ## Features
 - Secure login and logout authentication
