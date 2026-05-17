@@ -2,4 +2,4 @@
 pip install -r requirements.txt
 python manage.py collectstatic --no-input
 python manage.py migrate
-python manage.py createsuperuser --noinput --username $DJANGO_SUPERUSER_USERNAME --email ""
+echo "from django.contrib.auth.models import User; User.objects.filter(username='Dheeraj').exists() or User.objects.create_superuser('Dheeraj', 'admin@admin.com', '$DJANGO_SUPERUSER_PASSWORD')" | python manage.py shell
