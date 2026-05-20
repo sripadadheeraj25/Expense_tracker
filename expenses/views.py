@@ -8,8 +8,6 @@ from .forms import ExpenseForm
 import json
 from datetime import date
 
-
-@login_required
 def expense_list(request):
     expenses = Expense.objects.all()
 
