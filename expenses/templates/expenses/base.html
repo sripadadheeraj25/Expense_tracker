@@ -17,19 +17,26 @@
     <span style="color:#60a5fa;">Tracker</span>
 </a>
     <div class="d-flex align-items-center gap-3">
-        {% if user.is_authenticated %}
-            <span class="text-white-50 small">Hi, {{ user.username }}</span>
-            <a href="{% url 'add-expense' %}" class="btn btn-success btn-sm">
-                + Add Expense
-            </a>
-            <form method="POST" action="{% url 'logout' %}" style="margin: 0;">
-    {% csrf_token %}
-    <button type="submit" class="btn btn-outline-light btn-sm">
-        Logout
-    </button>
-</form>
-        {% endif %}
-    </div>
+    {% if user.is_authenticated %}
+        <span class="text-white-50 small">Hi, {{ user.username }}</span>
+        <a href="{% url 'add-expense' %}" class="btn btn-orange btn-sm">
+            + Add Expense
+        </a>
+        <form method="POST" action="{% url 'logout' %}" style="margin:0;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-blue btn-sm">
+                Logout
+            </button>
+        </form>
+    {% else %}
+        <a href="{% url 'add-expense' %}" class="btn btn-orange btn-sm">
+            + Add Expense
+        </a>
+        <a href="{% url 'login' %}" class="btn btn-outline-blue btn-sm">
+            Login
+        </a>
+    {% endif %}
+</div>
 </nav>
 
     <div class="container">

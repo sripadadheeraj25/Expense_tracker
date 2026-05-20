@@ -9,7 +9,10 @@ import json
 from datetime import date
 
 def expense_list(request):
-    expenses = Expense.objects.all()
+    if request.user.is_authenticated:
+        expenses = Expense.objects.all()
+    else:
+        expenses = Expense.objects.none()  # empty for visitors
 
     total = expenses.aggregate(Sum('amount'))['amount__sum'] or 0
 
